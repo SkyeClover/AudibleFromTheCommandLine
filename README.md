@@ -121,7 +121,8 @@ audctl serve --host 127.0.0.1 --port 8765
 | `GET` | `/` | — | Service name, version, endpoint list. |
 | `GET` | `/health` | — | `{ "status": "ok" }` |
 | `GET` | `/v1/status` | — | Same fields as `audctl status` (paths, `library_items`, credentials present, …). |
-| `POST` | `/v1/play` | `{ "asin": "B0…", "headless": false }` | Opens web player; returns `via`, `pid` (if Chromium), `url`. |
+| `POST` | `/v1/play` | `{ "asin": "B0…" }` and/or `{ "title": "…" }`, optional `headless`, `offscreen`, `offscreen_position` | Opens web player or search; search defaults to `offscreen` when not headless. Returns `via`, `pid`, `url`, `asin`, `resolver`. |
+| `POST` | `/v1/stop` | `{ "signal": "term" }` or `"kill"` | Best-effort: signals Chromium using the configured profile (see `audctl stop`). |
 | `POST` | `/v1/sync` | `{}` | Refreshes library DB (requires prior `audctl setup`). |
 | `POST` | `/v1/resolve` | `{ "title": "…" }` and/or `{ "asin": "B0…" }` | `{ "ok": true, "result": { … } }` (same shape as CLI `resolve --json`). |
 
@@ -131,11 +132,13 @@ Examples:
 curl -sS http://127.0.0.1:8765/
 curl -sS http://127.0.0.1:8765/v1/status
 curl -sS -X POST http://127.0.0.1:8765/v1/play -H 'Content-Type: application/json' -d '{"asin":"B012345678","headless":false}'
+curl -sS -X POST http://127.0.0.1:8765/v1/play -H 'Content-Type: application/json' -d '{"title":"Some Book","offscreen":true}'
+curl -sS -X POST http://127.0.0.1:8765/v1/stop -H 'Content-Type: application/json' -d '{"signal":"term"}'
 curl -sS -X POST http://127.0.0.1:8765/v1/resolve -H 'Content-Type: application/json' -d '{"title":"Some Book"}'
 curl -sS -X POST http://127.0.0.1:8765/v1/sync -H 'Content-Type: application/json' -d '{}'
 ```
 
-**Security:** there is **no authentication** and responses use **CORS `*`** for simple local scripting. Bind to **`127.0.0.1`** only; if you must expose it, put **TLS + auth** (reverse proxy, API gateway) in front.
+**Security:** by default there is **no authentication** and responses use **CORS `*`** for simple local scripting. Set **`AUDCTL_HTTP_TOKEN`** to require **`Authorization: Bearer <token>`** on every route except **`GET /`** and **`GET /health`**. Bind to **`127.0.0.1`** only; if you must expose the API, put **TLS + auth** (reverse proxy, API gateway) in front.
 
 ## What works vs caveats
 
@@ -156,6 +159,8 @@ curl -sS -X POST http://127.0.0.1:8765/v1/sync -H 'Content-Type: application/jso
 | `$AUDCTL_CHROMIUM_PROFILE_DIR` | Chromium profile for web session. |
 | `$AUDCTL_PREFER_DEFAULT_BROWSER` | If `1` / `true`, skip Chromium and always use the OS default browser for web login. |
 | `$AUDCTL_ALLOW_SEARCH_SCRAPE` | Last-resort HTML search for `resolve` when nothing else matches. |
+| `$AUDCTL_HTTP_TOKEN` | If set, `audctl serve` requires `Authorization: Bearer …` (except `GET /` and `GET /health`). |
+| `$AUDCTL_CHROME_OFFSCREEN_POSITION` | `X,Y` for `--offscreen` Chromium launches (default `10000,200`). |
 | `$AUDCTL_LIBRARY_INDEX` | Legacy JSON `[{title, asin}]` if you still use it (SQLite is preferred). |
 
 API credentials are stored under `$XDG_STATE_HOME/audctl/audible_credentials.json` (encrypted by the `audible` library). Config files written by `audctl init-config` use mode **600** on POSIX.
@@ -167,6 +172,7 @@ MIT — see [LICENSE](LICENSE). Changelog: [CHANGELOG.md](CHANGELOG.md).
 ## Development
 
 ```bash
+python3 -m venv .venv && . .venv/bin/activate
 pip install -e ".[dev]"
 pytest
 ```

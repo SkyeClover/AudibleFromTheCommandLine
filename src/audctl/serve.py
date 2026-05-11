@@ -3,11 +3,28 @@
 from __future__ import annotations
 
 import json
+import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 from urllib.parse import urlparse
 
 from audctl.http_api import RouteHandler
+
+
+def _http_token() -> str:
+    return os.environ.get("AUDCTL_HTTP_TOKEN", "").strip()
+
+
+def _authorized(handler: BaseHTTPRequestHandler) -> bool:
+    token = _http_token()
+    if not token:
+        return True
+    parsed = urlparse(handler.path)
+    p = (parsed.path or "/").rstrip("/") or "/"
+    if p in ("/health", "/"):
+        return True
+    auth = (handler.headers.get("Authorization") or "").strip()
+    return auth == f"Bearer {token}"
 
 
 def make_handler(*, routes: dict[str, RouteHandler]) -> type[BaseHTTPRequestHandler]:
@@ -42,6 +59,9 @@ def make_handler(*, routes: dict[str, RouteHandler]) -> type[BaseHTTPRequestHand
             self.end_headers()
 
         def do_GET(self) -> None:  # noqa: N802
+            if not _authorized(self):
+                self._json(401, {"error": "unauthorized", "hint": "Set Authorization: Bearer <AUDCTL_HTTP_TOKEN>."})
+                return
             key = self._path_key()
             handler = routes.get(key)
             if not handler:
@@ -58,6 +78,9 @@ def make_handler(*, routes: dict[str, RouteHandler]) -> type[BaseHTTPRequestHand
             self._json(200, result)
 
         def do_POST(self) -> None:  # noqa: N802
+            if not _authorized(self):
+                self._json(401, {"error": "unauthorized", "hint": "Set Authorization: Bearer <AUDCTL_HTTP_TOKEN>."})
+                return
             key = self._path_key()
             handler = routes.get(key)
             if not handler:

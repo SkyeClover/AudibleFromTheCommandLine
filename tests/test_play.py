@@ -24,3 +24,16 @@ def test_build_chromium_argv_no_headless() -> None:
         headless=False,
     )
     assert "--headless=new" not in argv
+
+
+def test_build_chromium_argv_offscreen() -> None:
+    argv = build_chromium_argv(
+        binary="/bin/chromium",
+        profile_dir=Path("/tmp/p"),
+        url="https://example.com",
+        headless=False,
+        offscreen=True,
+        offscreen_position="5000,100",
+    )
+    assert "--window-position=5000,100" in argv
+    assert "--new-window" in argv

@@ -372,6 +372,11 @@ def play_cmd(
     title: str | None = typer.Option(None, "--title"),
     asin: str | None = typer.Option(None, "--asin"),
     headless: bool = typer.Option(False, "--headless", help="Use Chromium headless mode (playback depends on OS/audio)."),
+    offscreen: bool = typer.Option(
+        False,
+        "--offscreen",
+        help="Park Chromium on a far corner (--window-position from AUDCTL_CHROME_OFFSCREEN_POSITION).",
+    ),
     dry_run: bool = typer.Option(False, "--dry-run"),
     json_out: bool = typer.Option(False, "--json"),
     url_only: bool = typer.Option(False, "--url-only", help="Print webplayer URL and exit (no browser)."),
@@ -407,6 +412,7 @@ def play_cmd(
         url=url,
         headless=headless,
         dry_run=dry_run,
+        offscreen=offscreen and not headless,
     )
     if dry_run:
         _emit({"url": url, **out}, as_json=json_out)
@@ -428,6 +434,7 @@ def play_cmd(
                 profile_dir=cfg.chromium_profile_dir,
                 url=url,
                 headless=headless,
+                offscreen=offscreen and not headless,
             )
         payload: dict[str, Any] = {"launched": True, "url": url, "via": via, "argv": argv}
         proc = out.get("proc")
@@ -533,8 +540,10 @@ def serve_cmd(
     """
     Local JSON HTTP API on http://HOST:PORT (default 127.0.0.1:8765).
 
-    Run ``curl -s http://127.0.0.1:8765/`` for a list of endpoints. No auth/TLS by default—
-    do not expose to the internet without a reverse proxy and authentication.
+    Run ``curl -s http://127.0.0.1:8765/`` for a list of endpoints.
+
+    If ``AUDCTL_HTTP_TOKEN`` is set, send ``Authorization: Bearer <token>`` for all routes
+    except ``GET /`` and ``GET /health``. Do not expose to the internet without TLS and auth.
     """
     cfg = _cfg()
     routes = build_routes(cfg)

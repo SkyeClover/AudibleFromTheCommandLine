@@ -18,6 +18,8 @@ def build_chromium_argv(
     profile_dir: Path,
     url: str,
     headless: bool,
+    offscreen: bool = False,
+    offscreen_position: str | None = None,
     extra_args: list[str] | None = None,
 ) -> list[str]:
     profile_dir = profile_dir.expanduser()
@@ -27,6 +29,15 @@ def build_chromium_argv(
             "--headless=new",
             "--disable-gpu",
             "--window-size=1280,720",
+        ]
+    elif offscreen:
+        pos = (offscreen_position or os.environ.get("AUDCTL_CHROME_OFFSCREEN_POSITION", "10000,200")).replace(
+            " ", ""
+        )
+        argv += [
+            "--new-window",
+            f"--window-position={pos}",
+            "--window-size=960,860",
         ]
     argv += [
         f"--user-data-dir={profile_dir}",
@@ -47,6 +58,8 @@ def launch_chromium(
     url: str,
     headless: bool,
     dry_run: bool,
+    offscreen: bool = False,
+    offscreen_position: str | None = None,
 ) -> subprocess.Popen[str] | list[str]:
     picked = pick_chromium_binary(binary)
     if not picked:
@@ -59,6 +72,8 @@ def launch_chromium(
         profile_dir=profile_dir,
         url=url,
         headless=headless,
+        offscreen=offscreen and not headless,
+        offscreen_position=offscreen_position,
     )
     if dry_run:
         return argv
@@ -83,6 +98,8 @@ def launch_web_player(
     url: str,
     headless: bool,
     dry_run: bool,
+    offscreen: bool = False,
+    offscreen_position: str | None = None,
 ) -> dict[str, Any]:
     """
     Open the web player in Chromium when available, otherwise the system default browser.
@@ -103,6 +120,8 @@ def launch_web_player(
             url=url,
             headless=headless,
             dry_run=dry_run,
+            offscreen=offscreen,
+            offscreen_position=offscreen_position,
         )
         if dry_run and isinstance(out, list):
             return {"via": "chromium", "url": url, "argv": out}
