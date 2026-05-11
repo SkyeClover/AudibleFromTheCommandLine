@@ -1,0 +1,30 @@
+# Optional: run `audctl serve` in Docker (Chromium + X11 from host).
+#   cp deploy/audctl-docker.env.example deploy/.env
+#   nano deploy/.env
+#   docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d --build
+#
+# Axiom (Docker): AXIOM_MEDIA_LAUNCH_AUDCTL_PLAY_URL=http://host.docker.internal:8765/v1/play
+#
+# On a desktop with snap Chromium, prefer systemd (deploy/systemd/) so the browser matches your host.
+
+services:
+  audctl-serve:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${AUDCTL_SERVE_PORT:-8765}:8765"
+    user: "${AUDCTL_UID:-1000}:${AUDCTL_GID:-1000}"
+    environment:
+      HOME: ${AUDCTL_HOME}
+      DISPLAY: ${DISPLAY:-:0}
+      XAUTHORITY: ${XAUTHORITY}
+      AUDCTL_HTTP_TOKEN: ${AUDCTL_HTTP_TOKEN:-}
+      AUDCTL_CHROMIUM_BINARY: /usr/bin/chromium
+    volumes:
+      - ${AUDCTL_STATE_DIR}:${AUDCTL_HOME}/.local/state/audctl
+      - ${AUDCTL_CONFIG_DIR}:${AUDCTL_HOME}/.config/audctl
+      - ${AUDCTL_CHROMIUM_PROFILE_DIR}:${AUDCTL_CHROMIUM_PROFILE_DIR}
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${XAUTHORITY}:${XAUTHORITY}:ro

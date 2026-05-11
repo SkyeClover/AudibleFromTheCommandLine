@@ -106,6 +106,38 @@ Entry point: **`audctl`** (or **`python -m audctl`**).
 | `audctl logout` | Instructions, or `--purge-profile --force` to delete only the Chromium profile. |
 | `audctl serve` | **HTTP JSON API** on `http://127.0.0.1:8765` by default (see below). |
 
+## Run `audctl serve` on boot (recommended)
+
+Use a **systemd user** unit so the API survives reboots after you log in (or use **linger** so it starts at boot without a GUI session).
+
+```bash
+cd ~/AudibleFromTheCommandLine
+python3 -m venv .venv && .venv/bin/pip install -e .
+mkdir -p ~/.config/systemd/user
+cp deploy/systemd/audctl-serve.service ~/.config/systemd/user/
+# Edit the file if your clone path is not ~/AudibleFromTheCommandLine
+systemctl --user daemon-reload
+systemctl --user enable --now audctl-serve.service
+```
+
+Boot **before any user logs in** (headless or pre-login):
+
+```bash
+sudo loginctl enable-linger "$USER"
+```
+
+Optional secrets (e.g. `AUDCTL_HTTP_TOKEN`): add `EnvironmentFile=-%h/AudibleFromTheCommandLine/deploy/audctl-serve.env` under `[Service]` in the unit, then create that file with `KEY=value` lines.
+
+## Docker (optional)
+
+If you prefer a container (Chromium **inside** the image + host **X11** + bind-mounted audctl config/state), use `deploy/docker-compose.yml`. Copy `deploy/audctl-docker.env.example` → `deploy/.env`, adjust paths, then:
+
+```bash
+docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d --build
+```
+
+This publishes **`8765`** on the host. **Axiom** in Docker can use `http://host.docker.internal:8765/v1/play`. The image uses Debian’s **`/usr/bin/chromium`** (not snap); your mounted profile directory should be the one `audctl` is configured to use.
+
 ## HTTP API (`audctl serve`)
 
 Run on the machine that has your Audible login / browser (or use `host.docker.internal` from a container with correct networking).
@@ -113,6 +145,8 @@ Run on the machine that has your Audible login / browser (or use `host.docker.in
 ```bash
 audctl serve --host 127.0.0.1 --port 8765
 ```
+
+Use `--host 0.0.0.0 --port 8765` only when other machines or Docker containers must reach the API on the LAN (prefer firewall + `AUDCTL_HTTP_TOKEN`).
 
 **Discovery:** `GET /` returns a list of routes and short descriptions.
 

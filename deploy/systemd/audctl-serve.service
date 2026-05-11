@@ -1,0 +1,18 @@
+[Unit]
+Description=audctl HTTP API (Audible play / resolve for Axiom and scripts)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Adjust paths if you cloned somewhere other than ~/AudibleFromTheCommandLine
+WorkingDirectory=%h/AudibleFromTheCommandLine
+Environment=PATH=%h/AudibleFromTheCommandLine/.venv/bin:/usr/local/bin:/usr/bin:/bin:/snap/bin
+# Optional secrets (AUDCTL_HTTP_TOKEN, DISPLAY tweaks, etc.):
+# EnvironmentFile=-%h/AudibleFromTheCommandLine/deploy/audctl-serve.env
+ExecStart=%h/AudibleFromTheCommandLine/.venv/bin/audctl serve --host 127.0.0.1 --port 8765
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

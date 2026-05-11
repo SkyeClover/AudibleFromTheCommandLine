@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Docker:** `Dockerfile` + `deploy/docker-compose.yml` + `deploy/audctl-docker.env.example` (optional `audctl serve` in a container with host X11 mounts).
+- **systemd:** `deploy/systemd/audctl-serve.service` user unit template for auto-start on login (see README).
 - HTTP API: `POST /v1/stop` to signal Chromium processes using the configured profile (`signal`: `term` or `kill`).
 - HTTP API: `POST /v1/play` accepts `title` (resolve via library index / optional search scrape) plus `offscreen`, `offscreen_position`, `headless`.
 - Optional bearer auth: set `AUDCTL_HTTP_TOKEN`; send `Authorization: Bearer …` for all routes except `GET /` and `GET /health`.
