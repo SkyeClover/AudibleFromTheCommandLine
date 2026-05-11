@@ -40,6 +40,11 @@ dev = [
 [project.scripts]
 audctl = "audctl.cli:app"
 
+[project.urls]
+Homepage = "https://github.com/SkyeClover/AudibleFromTheCommandLine"
+Repository = "https://github.com/SkyeClover/AudibleFromTheCommandLine"
+Issues = "https://github.com/SkyeClover/AudibleFromTheCommandLine/issues"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 

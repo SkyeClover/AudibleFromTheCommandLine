@@ -23,19 +23,18 @@ pytest
 - Add or update tests when behavior changes.
 - Match existing style (Typer CLI, small modules under `src/audctl/`).
 
-## Publishing checklist (maintainers)
+## Repository
 
-1. Create an empty GitHub repository (name it however you like; this checkout folder may stay `Audible_FromTheCommandLine`).
-2. Push the first commit, for example:
+Upstream lives at [github.com/SkyeClover/AudibleFromTheCommandLine](https://github.com/SkyeClover/AudibleFromTheCommandLine). **`[project.urls]`** in `pyproject.toml` and the README CI badge point there; update them if you maintain a long-lived fork as the new canonical home.
+
+## Publishing checklist (forks / new remotes)
+
+1. Add your remote and push (if this is a fresh checkout without `origin`):
 
    ```bash
-   git init
-   git add .
-   git commit -m "Initial import"
+   git remote add origin https://github.com/SkyeClover/AudibleFromTheCommandLine.git
    git branch -M main
-   git remote add origin https://github.com/<you>/<repo>.git
    git push -u origin main
    ```
 
-3. Add **`[project.urls]`** in `pyproject.toml` with real Homepage, Repository, and Issues URLs.
-4. Optionally add a CI status badge to `README.md` pointing at your repo’s Actions tab.
+2. Confirm GitHub **Actions** are enabled so the CI workflow runs on `main`.

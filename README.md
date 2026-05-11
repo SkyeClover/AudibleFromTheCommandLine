@@ -1,5 +1,9 @@
 # audctl
 
+[![CI](https://github.com/SkyeClover/AudibleFromTheCommandLine/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/SkyeClover/AudibleFromTheCommandLine/actions/workflows/ci.yml)
+
+**Repository:** [github.com/SkyeClover/AudibleFromTheCommandLine](https://github.com/SkyeClover/AudibleFromTheCommandLine)
+
 Terminal-first helper for **your** Audible library: sign in once (including SMS / authenticator prompts), **index titles and ASINs** into a local SQLite database, then open the **normal web player** by title without clicking through the library every time.
 
 Playback still happens in a **browser** (Chromium/Chrome/Edge when available, otherwise your OS default). DRM stays in the browser. This project is **not affiliated with Audible or Amazon** and is **not** an official product; the library list uses the **unofficial** [`audible`](https://pypi.org/project/audible/) Python package (internal API), which can break if Amazon changes endpoints or policies.
@@ -57,20 +61,21 @@ You should get the first-time prompts again (or run `audctl setup` explicitly).
 
 ## Install
 
-From a clone of this repository (replace the URL with your fork or upstream):
+From a clone of [the GitHub repository](https://github.com/SkyeClover/AudibleFromTheCommandLine):
 
 ```bash
-git clone <repository-url>
-cd Audible_FromTheCommandLine
+git clone https://github.com/SkyeClover/AudibleFromTheCommandLine.git
+cd AudibleFromTheCommandLine
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 ```
 
-Or install the directory in place with **pipx** (no dev extras):
+Or install from the clone root with **pipx** (no dev extras):
 
 ```bash
-pipx install /path/to/audctl
+cd AudibleFromTheCommandLine
+pipx install .
 ```
 
 Entry point: **`audctl`** (or **`python -m audctl`**).
