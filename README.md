@@ -12,9 +12,9 @@ Playback still happens in a **browser** (Chromium/Chrome/Edge when available, ot
 
 1. Run **`audctl`** with no arguments (or `audctl setup` first if you prefer explicit steps).
 2. If no API credentials exist yet, you are prompted for **email** and **password** (password is hidden). Amazon may ask for **authenticator codes**, **SMS/email codes**, or a **CAPTCHA**—follow the on-screen prompts. Wrong password / account lockouts surface as clear errors instead of a generic failure. At the **SMS/email verification** step, the tool submits Amazon’s page first (so a code can actually be sent), then offers **`[r]` resend** if the page exposes a resend control—if nothing arrives, check spam, wait a minute, confirm **`-m` marketplace** matches your account, or finish sign-in in a normal browser.
-3. You are offered **Chromium** for a one-time **web** login as well. Accept unless you only care about metadata: the web player needs browser cookies for audio.
+3. You are offered a **browser** for a one-time **web** login as well (Chromium/Chrome/Edge when available, otherwise the OS default—see `AUDCTL_PREFER_DEFAULT_BROWSER`). Accept unless you only care about metadata: the web player needs browser cookies for audio.
 4. Your library is **synced** into `$XDG_STATE_HOME/audctl/library.db` (ASIN, title, authors, narrators, runtime when the API returns them).
-5. A **terminal UI** opens: filter with `/`, **S** sync, **T** toggle “tracked”, **P** play selected row in Chromium.
+5. A **terminal UI** opens: filter with `/`, **S** sync, **T** toggle “tracked”, **P** open the web player for the selected row (same browser strategy as `audctl play`).
 
 ### Every later start
 
@@ -93,7 +93,7 @@ Entry point: **`audctl`** (or **`python -m audctl`**).
 | `audctl setup` | API login wizard (`-m` / `--marketplace` for country code). |
 | `audctl sync` | Refresh SQLite index from your library. |
 | `audctl tui` | Open the TUI only. |
-| `audctl login` | Chromium-only web sign-in (cookies for playback). |
+| `audctl login` | Web sign-in for playback cookies (Chromium when available, else default browser). |
 | `audctl play` / `resolve` / `urls` / `stop` / … | Same as before (see `--help`). |
 | `audctl init-config` | Write `config.toml` (`--marketplace` sets host + country together). |
 | `audctl status` | Profile paths, API credential presence, library row count. |

@@ -143,7 +143,7 @@ def login_cmd(
     dry_run: bool = typer.Option(False, "--dry-run", help="Print Chromium argv only."),
     json_out: bool = typer.Option(False, "--json", help="Emit machine-readable output."),
 ) -> None:
-    """Chromium-only sign-in (web cookies). Use `audctl setup` for API + library sync."""
+    """Web sign-in for playback cookies (Chromium/Chrome/Edge when available, else default browser). Use `audctl setup` for API + library sync."""
     cfg = _cfg()
     result = open_login_window(
         host=cfg.audible_host,
@@ -376,7 +376,7 @@ def play_cmd(
     json_out: bool = typer.Option(False, "--json"),
     url_only: bool = typer.Option(False, "--url-only", help="Print webplayer URL and exit (no browser)."),
 ) -> None:
-    """Launch Chromium on the Audible web player for a title or ASIN."""
+    """Open the Audible web player for a title or ASIN (Chromium when available, else default browser)."""
     cfg = _cfg()
     if asin:
         a = validate_asin(asin)
